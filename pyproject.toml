@@ -1,0 +1,49 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "xarray-sweep"
+version = "0.1.0"
+description = "Simple grid search utility that returns xarray outputs."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+  {name = "Your Name"}
+]
+keywords = ["xarray", "grid-search", "parameter-sweep", "science"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering"
+]
+dependencies = [
+  "xarray>=2024.1.0",
+  "pandas>=2.0.0",
+  "tqdm>=4.66.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "build>=1.2.2",
+  "twine>=5.1.1"
+]
+
+[project.urls]
+Homepage = "https://github.com/your-username/xarray-sweep"
+Repository = "https://github.com/your-username/xarray-sweep"
+Issues = "https://github.com/your-username/xarray-sweep/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/xarray_sweep"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
