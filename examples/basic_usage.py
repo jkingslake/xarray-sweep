@@ -1,4 +1,4 @@
-from xarray_sweep import grid_search
+from xarray_sweep import xarray_sweep
 
 
 def model(a: float, b: float) -> float:
@@ -6,5 +6,5 @@ def model(a: float, b: float) -> float:
 
 
 if __name__ == "__main__":
-    out = grid_search(model, a=[0.1, 0.2], b=[1.0, 2.0])
+    out = xarray_sweep(model, a=[0.1, 0.2], b=[1.0, 2.0])
     print(out)

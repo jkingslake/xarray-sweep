@@ -9,7 +9,9 @@ import xarray as xr
 from tqdm.auto import tqdm
 
 
-def grid_search(function: Callable[..., Any], *, show_progress: bool = True, **params: Iterable[Any]) -> xr.Dataset | xr.DataArray:
+def xarray_sweep(
+    function: Callable[..., Any], *, show_progress: bool = True, **params: Iterable[Any]
+) -> xr.Dataset | xr.DataArray:
     """Run a function over the Cartesian product of parameter values.
 
     Parameters
@@ -59,6 +61,10 @@ def grid_search(function: Callable[..., Any], *, show_progress: bool = True, **p
     return stacked.unstack("stacked_dim")
 
 
-# Backward-compatible alias with original public name.
+# Backward-compatible aliases for previous public names.
+def grid_search(function: Callable[..., Any], **kwargs: Iterable[Any]) -> xr.Dataset | xr.DataArray:
+    return xarray_sweep(function, **kwargs)
+
+
 def gridSearch(function: Callable[..., Any], **kwargs: Iterable[Any]) -> xr.Dataset | xr.DataArray:
-    return grid_search(function, **kwargs)
+    return xarray_sweep(function, **kwargs)
