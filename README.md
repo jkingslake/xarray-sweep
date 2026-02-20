@@ -30,6 +30,12 @@ out = xarray_sweep(model, a=[0.1, 0.2], b=[1.0, 2.0])
 print(out)
 ```
 
+`xarray_sweep` executes combinations with Dask by default. To run sequentially:
+
+```python
+out = xarray_sweep(model, use_dask=False, a=[0.1, 0.2], b=[1.0, 2.0])
+```
+
 ## Run tests
 
 ```bash

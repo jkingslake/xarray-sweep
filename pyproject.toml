@@ -26,7 +26,8 @@ classifiers = [
 dependencies = [
   "xarray>=2024.1.0",
   "pandas>=2.0.0",
-  "tqdm>=4.66.0"
+  "tqdm>=4.66.0",
+  "dask>=2024.1.0"
 ]
 
 [project.optional-dependencies]

@@ -14,3 +14,4 @@ build/
 # Test/cache artifacts
 .pytest_cache/
 .coverage
+.DS_Store

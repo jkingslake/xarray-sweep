@@ -27,6 +27,15 @@ def test_xarray_sweep_with_dataset_output():
     assert out["value"].sel(a=3, b=5).item() == 15
 
 
+def test_xarray_sweep_without_dask_still_works():
+    def fn(a: int, b: int) -> int:
+        return a * b
+
+    out = xarray_sweep(fn, show_progress=False, use_dask=False, a=[2, 3], b=[4, 5])
+    assert out.sel(a=2, b=4).item() == 8
+    assert out.sel(a=3, b=5).item() == 15
+
+
 def test_legacy_name_still_works():
     def fn(a: int) -> int:
         return a
