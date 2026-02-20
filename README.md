@@ -30,7 +30,17 @@ out = xarray_sweep(model, a=[0.1, 0.2], b=[1.0, 2.0])
 print(out)
 ```
 
-`xarray_sweep` runs sequentially by default. To execute combinations with Dask:
+`xarray_sweep` runs sequentially by default. To run parameter combinations in parallel using threads (useful for I/O-bound or numpy/xarray workloads that release the GIL), use `n_jobs`:
+
+```python
+# Use 4 worker threads
+out = xarray_sweep(model, n_jobs=4, a=[0.1, 0.2], b=[1.0, 2.0])
+
+# Use all available CPUs
+out = xarray_sweep(model, n_jobs=-1, a=[0.1, 0.2], b=[1.0, 2.0])
+```
+
+To execute combinations with Dask:
 
 ```python
 out = xarray_sweep(model, use_dask=True, a=[0.1, 0.2], b=[1.0, 2.0])

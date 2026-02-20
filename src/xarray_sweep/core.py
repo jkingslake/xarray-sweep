@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
+from concurrent.futures import ThreadPoolExecutor
 from itertools import product
+import os
 from typing import Any
 
 from dask import delayed
@@ -38,6 +40,7 @@ def xarray_sweep(
     show_progress: bool = True,
     use_dask: bool = False,
     compute: bool = True,
+    n_jobs: int = 1,
     **params: Iterable[Any],
 ) -> xr.Dataset | xr.DataArray | Delayed:
     """Run a function over the Cartesian product of parameter values.
@@ -52,7 +55,11 @@ def xarray_sweep(
         Whether to execute parameter combinations with dask.
     compute:
         Whether to evaluate immediately. If False, returns a delayed object.
-        
+    n_jobs:
+        Number of worker threads for parallel execution. Use ``1`` (default)
+        for sequential execution, ``-1`` to use all available CPUs, or any
+        positive integer to set the exact number of workers. Ignored when
+        ``use_dask=True``.
     **params:
         Parameter name -> iterable of values to sweep.
 
@@ -92,11 +99,23 @@ def xarray_sweep(
     if not compute:
         raise ValueError("compute=False requires use_dask=True.")
 
-    outputs: list[xr.Dataset | xr.DataArray] = []
-    iterator = tqdm(index, disable=not show_progress)
-    for combo in iterator:
-        inputs = dict(zip(param_names, combo, strict=True))
-        outputs.append(_evaluate_combination(function, inputs))
+    all_inputs = [dict(zip(param_names, combo, strict=True)) for combo in combinations]
+
+    if n_jobs != 1:
+        workers = os.cpu_count() if n_jobs == -1 else n_jobs
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = [
+                executor.submit(_evaluate_combination, function, inputs)
+                for inputs in all_inputs
+            ]
+            iterator = tqdm(futures, disable=not show_progress)
+            outputs = [f.result() for f in iterator]
+    else:
+        outputs: list[xr.Dataset | xr.DataArray] = []
+        iterator = tqdm(all_inputs, disable=not show_progress)
+        for inputs in iterator:
+            outputs.append(_evaluate_combination(function, inputs))
+
     return _assemble_outputs(outputs, index)
 
 
