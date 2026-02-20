@@ -80,6 +80,30 @@ def test_grid_search_alias_still_works():
     assert set(out.dims) == {"a"}
 
 
+def test_n_jobs_parallel_gives_same_result():
+    def fn(a: int, b: int) -> int:
+        return a + b
+
+    sequential = xarray_sweep(fn, show_progress=False, n_jobs=1, a=[1, 2], b=[10, 20])
+    parallel = xarray_sweep(fn, show_progress=False, n_jobs=2, a=[1, 2], b=[10, 20])
+
+    assert isinstance(parallel, xr.DataArray)
+    assert set(parallel.dims) == {"a", "b"}
+    assert parallel.sel(a=1, b=10).item() == sequential.sel(a=1, b=10).item()
+    assert parallel.sel(a=2, b=20).item() == sequential.sel(a=2, b=20).item()
+
+
+def test_n_jobs_minus_one_uses_all_cpus():
+    def fn(a: int) -> int:
+        return a * 2
+
+    out = xarray_sweep(fn, show_progress=False, n_jobs=-1, a=[1, 2, 3])
+
+    assert isinstance(out, xr.DataArray)
+    assert out.sel(a=1).item() == 2
+    assert out.sel(a=3).item() == 6
+
+
 def test_empty_param_sweep_raises_value_error():
     def fn(a: int) -> int:
         return a
