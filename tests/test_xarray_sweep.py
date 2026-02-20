@@ -1,4 +1,5 @@
 from dask.delayed import Delayed
+import pytest
 import xarray as xr
 
 from xarray_sweep import grid_search, gridSearch, xarray_sweep
@@ -102,6 +103,31 @@ def test_n_jobs_minus_one_uses_all_cpus():
     assert isinstance(out, xr.DataArray)
     assert out.sel(a=1).item() == 2
     assert out.sel(a=3).item() == 6
+
+
+def test_n_jobs_minus_one_float_params():
+    """Exact reproduction of the reported failing call."""
+
+    def fn(a: float, b: float) -> float:
+        return a + b
+
+    out = xarray_sweep(fn, n_jobs=-1, a=[0.1, 0.2], b=[1.0, 2.0])
+    assert isinstance(out, xr.DataArray)
+    assert set(out.dims) == {"a", "b"}
+    assert out.sel(a=0.1, b=1.0).item() == pytest.approx(1.1)
+    assert out.sel(a=0.2, b=2.0).item() == pytest.approx(2.2)
+
+
+def test_n_jobs_invalid_raises_value_error():
+    def fn(a: int) -> int:
+        return a
+
+    try:
+        xarray_sweep(fn, show_progress=False, n_jobs=0, a=[1, 2])
+    except ValueError as exc:
+        assert "n_jobs" in str(exc).lower()
+    else:
+        raise AssertionError("Expected ValueError for n_jobs=0")
 
 
 def test_empty_param_sweep_raises_value_error():
