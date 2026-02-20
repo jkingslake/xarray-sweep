@@ -102,23 +102,14 @@ def xarray_sweep(
     all_inputs = [dict(zip(param_names, combo, strict=True)) for combo in combinations]
 
     if n_jobs != 1:
-        if n_jobs != -1 and n_jobs < 1:
-            raise ValueError("n_jobs must be -1 (all CPUs) or a positive integer.")
-        workers = (os.cpu_count() or 1) if n_jobs == -1 else n_jobs
+        workers = os.cpu_count() if n_jobs == -1 else n_jobs
         with ThreadPoolExecutor(max_workers=workers) as executor:
             futures = [
-                executor.submit(function, **inputs)
+                executor.submit(_evaluate_combination, function, inputs)
                 for inputs in all_inputs
             ]
-            raw_results = [
-                f.result() for f in tqdm(futures, disable=not show_progress)
-            ]
-        outputs = []
-        for result, inputs in zip(raw_results, all_inputs, strict=True):
-            if isinstance(result, xr.Dataset):
-                outputs.append(result.assign_coords(inputs))
-            else:
-                outputs.append(xr.DataArray(result, coords=inputs))
+            iterator = tqdm(futures, disable=not show_progress)
+            outputs = [f.result() for f in iterator]
     else:
         outputs: list[xr.Dataset | xr.DataArray] = []
         iterator = tqdm(all_inputs, disable=not show_progress)
