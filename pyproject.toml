@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "xarray-sweep"
-version = "0.1.5"
+version = "0.1.6"
 description = "Simple grid search utility that returns xarray outputs."
 readme = "README.md"
 requires-python = ">=3.10"

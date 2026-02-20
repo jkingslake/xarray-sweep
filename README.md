@@ -30,11 +30,31 @@ out = xarray_sweep(model, a=[0.1, 0.2], b=[1.0, 2.0])
 print(out)
 ```
 
-`xarray_sweep` executes combinations with Dask by default. To run sequentially:
+`xarray_sweep` runs sequentially by default. To execute combinations with Dask:
 
 ```python
-out = xarray_sweep(model, use_dask=False, a=[0.1, 0.2], b=[1.0, 2.0])
+out = xarray_sweep(model, use_dask=True, a=[0.1, 0.2], b=[1.0, 2.0])
 ```
+
+To build a delayed computation (for distributed workflows), use `compute=False`:
+
+```python
+delayed_out = xarray_sweep(model, use_dask=True, compute=False, a=[0.1, 0.2], b=[1.0, 2.0])
+```
+
+Then you can compute this later with
+
+```python
+out = delayed_out.compute()
+```
+ or if you like you can use a progress bar with:
+
+ ```python
+from dask.diagnostics import ProgressBar
+with ProgressBar():
+    out = delayed_out.compute()
+```
+
 
 ## Run tests
 

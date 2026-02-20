@@ -1,3 +1,4 @@
+from dask.delayed import Delayed
 import xarray as xr
 
 from xarray_sweep import grid_search, gridSearch, xarray_sweep
@@ -34,6 +35,33 @@ def test_xarray_sweep_without_dask_still_works():
     out = xarray_sweep(fn, show_progress=False, use_dask=False, a=[2, 3], b=[4, 5])
     assert out.sel(a=2, b=4).item() == 8
     assert out.sel(a=3, b=5).item() == 15
+
+
+def test_xarray_sweep_compute_false_returns_delayed():
+    def fn(a: int, b: int) -> int:
+        return a + b
+
+    delayed_out = xarray_sweep(
+        fn, show_progress=False, use_dask=True, compute=False, a=[1, 2], b=[10, 20]
+    )
+    assert isinstance(delayed_out, Delayed)
+
+    out = delayed_out.compute()
+    assert isinstance(out, xr.DataArray)
+    assert out.sel(a=1, b=10).item() == 11
+    assert out.sel(a=2, b=20).item() == 22
+
+
+def test_compute_false_requires_dask_execution():
+    def fn(a: int) -> int:
+        return a
+
+    try:
+        xarray_sweep(fn, show_progress=False, use_dask=False, compute=False, a=[1, 2])
+    except ValueError as exc:
+        assert "requires use_dask=true" in str(exc).lower()
+    else:
+        raise AssertionError("Expected ValueError when compute=False and use_dask=False")
 
 
 def test_legacy_name_still_works():
